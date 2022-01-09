@@ -1,5 +1,87 @@
 {
-    "elements": [],
-    "actions": [],
+    "elements": [
+        {
+            "type": "ExpansionPanel",
+            "caption": "Module Help",
+            "items": [
+                {
+                    "type": "Label",
+                    "label": "This module allows to monitor and controller WARP2 Chargers."
+                },
+                {
+                    "type": "Label",
+                    "label": "Please enter the charger IP Address and a user allowed to log in."
+                },
+                {
+                    "type": "Label",
+                    "label": "To manage certain devices, please use their MAC address - easiest method might be to take it from the controller interface."
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "label": "WARP Charger - Configuration"
+        },
+        {
+            "type": "Select",
+            "name": "ControllerType",
+            "caption": "Controller Type",
+            "options": [
+                {
+                    "caption": "DreamMachine / Pro / CloudKey V2",
+                    "value": 0
+                },
+                {
+                    "caption": "CloudKey",
+                    "value": 1
+                }
+            ]
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "ChargerAddress",
+            "caption": "Charger IP Address",
+            "validate": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "UserName",
+            "caption": "User Name"
+        },
+        {
+            "type": "PasswordTextBox",
+            "name": "Password",
+            "caption": "Password"
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "Timer",
+            "caption": "Update Frequency",
+            "suffix": "sec - 0 is off",
+            "digits": 0,
+            "minimum": 0
+        },
+        {
+            "type": "Label",
+            "label": "Please enter the MAC Address of the device to be monitored."
+        }
+    ],
+    "actions": [
+        {
+        "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Button",
+                    "label": "Test",
+                    "onClick": "WC_GetData($id);"
+                },
+                {
+                    "type": "Button",
+                    "label": "Get State",
+                    "onClick": "WC_GetState($id);"
+                }
+            ]
+        }
+    ],
     "status": []
 }
