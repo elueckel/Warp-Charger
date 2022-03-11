@@ -23,21 +23,6 @@
             "label": "WARP Charger - Configuration"
         },
         {
-            "type": "Select",
-            "name": "ControllerType",
-            "caption": "Controller Type",
-            "options": [
-                {
-                    "caption": "DreamMachine / Pro / CloudKey V2",
-                    "value": 0
-                },
-                {
-                    "caption": "CloudKey",
-                    "value": 1
-                }
-            ]
-        },
-        {
             "type": "ValidationTextBox",
             "name": "ChargerAddress",
             "caption": "Charger IP Address",
@@ -72,13 +57,13 @@
             "items": [
                 {
                     "type": "Button",
-                    "label": "Test",
-                    "onClick": "WC_GetData($id);"
+                    "label": "Get State",
+                    "onClick": "WC_GetState($id);"
                 },
                 {
                     "type": "Button",
-                    "label": "Get State",
-                    "onClick": "WC_GetState($id);"
+                    "label": "Get Meter Reading",
+                    "onClick": "WC_GetMeterReading($id);"
                 }
             ]
         }
