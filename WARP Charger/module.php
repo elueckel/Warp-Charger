@@ -31,13 +31,14 @@ declare(strict_types=1);
 				IPS_SetVariableProfileAssociation("WC.iec61851_state", 4, $this->Translate('E/F: Error'), "", -1);
 			}
 
-			if (IPS_VariableProfileExists("WC.vehicle_state") == false) {
-				IPS_CreateVariableProfile("WC.vehicle_state", 1);
-				IPS_SetVariableProfileIcon("WC.vehicle_state", "Information");
-				IPS_SetVariableProfileAssociation("WC.vehicle_state", 0, $this->Translate('Not Connected'), "", -1);
-				IPS_SetVariableProfileAssociation("WC.vehicle_state", 1, $this->Translate('Connected'), "", -1);
-				IPS_SetVariableProfileAssociation("WC.vehicle_state", 2, $this->Translate('Loading'), "", -1);
-				IPS_SetVariableProfileAssociation("WC.vehicle_state", 3, $this->Translate('Error'), "", -1);
+			if (IPS_VariableProfileExists("WC.charger_state") == false) {
+				IPS_CreateVariableProfile("WC.charger_state", 1);
+				IPS_SetVariableProfileIcon("WC.charger_state", "Information");
+				IPS_SetVariableProfileAssociation("WC.charger_state", 0, $this->Translate('Not Connected'), "", -1);
+				IPS_SetVariableProfileAssociation("WC.charger_state", 1, $this->Translate('Waiting for charger clearance'), "", -1);
+				IPS_SetVariableProfileAssociation("WC.charger_state", 2, $this->Translate('Ready for charging'), "", -1);
+				IPS_SetVariableProfileAssociation("WC.charger_state", 3, $this->Translate('Charging'), "", -1);
+				IPS_SetVariableProfileAssociation("WC.charger_state", 4, $this->Translate('Error'), "", -1);
 			}
 
 			if (IPS_VariableProfileExists("WC.contactor_state") == false) {
@@ -47,14 +48,6 @@ declare(strict_types=1);
 				IPS_SetVariableProfileAssociation("WC.contactor_state", 1, $this->Translate('Current carrying before, but not after contactor'), "", -1);
 				IPS_SetVariableProfileAssociation("WC.contactor_state", 2, $this->Translate('Not current carrying before, but after contactor'), "", -1);
 				IPS_SetVariableProfileAssociation("WC.contactor_state", 3, $this->Translate('Current carrying before and after contactor'), "", -1);
-			}
-
-			if (IPS_VariableProfileExists("WC.charge_release") == false) {
-				IPS_CreateVariableProfile("WC.charge_release", 1);
-				IPS_SetVariableProfileIcon("WC.charge_release", "EnergyProduction");
-				IPS_SetVariableProfileAssociation("WC.charge_release", 0, $this->Translate('Automatic'), "", -1);
-				IPS_SetVariableProfileAssociation("WC.charge_release", 1, $this->Translate('Manuel'), "", -1);
-				IPS_SetVariableProfileAssociation("WC.charge_release", 2, $this->Translate('Deaktivated'), "", -1);
 			}
 
 			if (IPS_VariableProfileExists("WC.allowed_charging_current") == false) {
@@ -97,20 +90,17 @@ declare(strict_types=1);
 			}
 
 			$this->RegisterVariableInteger("Current_State", $this->translate("Current State"), "WC.iec61851_state");
-            $this->RegisterVariableInteger("Vehicle_State", $this->translate("Vehicle State"), "WC.vehicle_state");
+            $this->RegisterVariableInteger("Charger_State", $this->translate("Charger State"), "WC.charger_state");
             $this->RegisterVariableInteger("Contactor_State", $this->translate("Contactor State"), "WC.contactor_state");
             $this->RegisterVariableInteger("Contactor_Error", $this->translate("Contactor Error Code"));
-            $this->RegisterVariableInteger("Charge_Release", $this->translate("Charge Release"), "WC.charge_release");
             $this->RegisterVariableInteger("Allowed_Charging_Current", $this->translate("Allowed Charging Current"), "WC.allowed_charging_current");
             $this->RegisterVariableInteger("Error_State", $this->translate("Error State"), "WC.error_state");
             $this->RegisterVariableInteger("Lock_State", $this->translate("Lock State"), "WC.lock_state");
-            $this->RegisterVariableString("Time_Since_State_Change", $this->translate("Minutes Since State Change"));
+            //$this->RegisterVariableString("Time_Since_State_Change", $this->translate("Minutes Since State Change"));
 
             $this->RegisterVariableFloat("Current_Charge_Power", $this->translate("Energy Current Charge Power"), "~Watt.14490");
             $this->RegisterVariableFloat("Energy_Since_Reset", $this->translate("Energy Since Reset"), "WC.kWh");
             $this->RegisterVariableFloat("Energy_Since_Production", $this->translate("Energy Since Production"), "WC.kWh");
-
-            $this->RegisterVariableInteger("DC_Fault_Current_State", $this->translate("DC Fault Current State"));
 
 			$this->RegisterVariableBoolean("Trigger_Start_Charging", $this->translate("_Start Charging"), "~Switch");
 			$this->RegisterVariableBoolean("Trigger_Stop_Charging", $this->translate("_Stop Charging"), "~Switch");
@@ -190,13 +180,12 @@ declare(strict_types=1);
 
 			$DataPointsState = json_decode($JSON_Result_Charger,true);
 			SetValue($this->GetIDForIdent("Current_State"),$DataPointsState["iec61851_state"]);
-            SetValue($this->GetIDForIdent("Vehicle_State"), $DataPointsState["vehicle_state"]);
+            SetValue($this->GetIDForIdent("Charger_State"), $DataPointsState["charger_state"]);
             SetValue($this->GetIDForIdent("Contactor_State"), $DataPointsState["contactor_state"]);
 			SetValue($this->GetIDForIdent("Contactor_Error"), $DataPointsState["contactor_error"]);
-			SetValue($this->GetIDForIdent("Charge_Release"), $DataPointsState["charge_release"]);
 			SetValue($this->GetIDForIdent("Error_State"), $DataPointsState["error_state"]);
 			SetValue($this->GetIDForIdent("Lock_State"), $DataPointsState["lock_state"]);
-			SetValue($this->GetIDForIdent("Time_Since_State_Change"), Round($DataPointsState["time_since_state_change"]/1000,0));
+			//SetValue($this->GetIDForIdent("Time_Since_State_Change"), Round($DataPointsState["time_since_state_change"]/1000,0));
 		}
 
 		public function GetMeterReading() 
@@ -251,21 +240,29 @@ declare(strict_types=1);
 
                         
             $URL = 'http://'.$ChargerAddress.$APIEndPoint;
+			//$fields = array("id" => 1);
+			$data = "\"\"";
+			$data_JSON = json_encode($data);
 
             $ch = curl_init();
-			curl_setopt($ch, CURLOPT_PUT, true);
+			//curl_setopt($ch, CURLOPT_PUT, true);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 			curl_setopt($ch, CURLOPT_URL, $URL);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$headers = array(); 
+			$headers[] = 'Content-Type: application/json';
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
             curl_setopt($ch, CURLOPT_TIMEOUT_MS, 5000);
             curl_setopt($ch, CURLOPT_USERNAME, $UserName);
             curl_setopt($ch, CURLOPT_PASSWORD, $Password);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, "\"\"");
+			curl_setopt($ch, CURLOPT_POSTFIELDS, "{}");
+			//curl_setopt($ch, CURLOPT_POSTFIELDS, "\"\"");
             curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC | CURLAUTH_DIGEST);
             $Result = curl_exec($ch);
-			var_dump($Result);
+			$this->SendDebug("Command Received", $Result, 0);
 
-            $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE );
 			$this->SendDebug($this->Translate("Request Data"), $this->Translate("HTTP CODE: ").$http_code, 0);
             $Error = curl_error($ch);
 
@@ -284,5 +281,6 @@ declare(strict_types=1);
 		{
 			$this->SetValue($Ident, $Value);
 		}
+
 
 	}
