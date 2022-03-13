@@ -257,7 +257,6 @@ declare(strict_types=1);
             curl_setopt($ch, CURLOPT_USERNAME, $UserName);
             curl_setopt($ch, CURLOPT_PASSWORD, $Password);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, "{}");
-			//curl_setopt($ch, CURLOPT_POSTFIELDS, "\"\"");
             curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC | CURLAUTH_DIGEST);
             $Result = curl_exec($ch);
 			$this->SendDebug("Command Received", $Result, 0);
