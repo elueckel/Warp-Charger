@@ -6,7 +6,7 @@
             "items": [
                 {
                     "type": "Label",
-                    "label": "This module allows to monitor and controller WARP2 Chargers."
+                    "label": "This module allows to monitor and control WARP2 Smart and Pro Chargers."
                 },
                 {
                     "type": "Label",
@@ -14,13 +14,13 @@
                 },
                 {
                     "type": "Label",
-                    "label": "To manage certain devices, please use their MAC address - easiest method might be to take it from the controller interface."
+                    "label": "The module will create a set of variables in the object tree. The ones with _ allow starting and stop charging simulating a push button."
                 }
             ]
         },
         {
             "type": "Label",
-            "label": "WARP Charger - Configuration"
+            "label": "WARP2 Charger - Configuration"
         },
         {
             "type": "ValidationTextBox",
@@ -48,7 +48,7 @@
         },
         {
             "type": "Label",
-            "label": "Please enter the MAC Address of the device to be monitored."
+            "label": "This module was build for WARP2 Chargers with Firmware 2.0 or higher!"
         }
     ],
     "actions": [
@@ -64,6 +64,12 @@
                     "type": "Button",
                     "label": "Get Meter Reading",
                     "onClick": "WC_GetMeterReading($id);"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Turn On archiving for statistics variables",
+                    "onClick": "WC_TurnArchivingOn($id);",
+                    "confirm": "WARNING Archiving consumes hard disk space. Do you want to activate?"
                 }
             ]
         }

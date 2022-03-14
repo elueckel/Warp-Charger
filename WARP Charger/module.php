@@ -1,10 +1,9 @@
 <?php
 
 declare(strict_types=1);
-	class WARPCharger extends IPSModule
-	{
-		public function Create()
-		{
+	class WARP2Charger extends IPSModule	{
+
+		public function Create() {
 			//Never delete this line!
 			parent::Create();
 
@@ -14,10 +13,6 @@ declare(strict_types=1);
 			$this->RegisterPropertyString("UserName", "");
 			$this->RegisterPropertyString("Password", "");
 			$this->RegisterPropertyInteger("Timer", "0");
-
-			//$this->RegisterPropertyBoolean("DataPointBasic", 1);
-			//$this->RegisterPropertyBoolean("DataPointHardware", 0);
-			//$this->RegisterPropertyBoolean("DataPointSpecific", 0);
 
 			$this->RegisterTimer("WARP Charger", 0, "WC_Update(\$_IPS['TARGET']);");
 
@@ -89,7 +84,7 @@ declare(strict_types=1);
 				IPS_SetVariableProfileText("WC.kWh", "", " kWh");
 			}
 
-			$this->RegisterVariableInteger("Current_State", $this->translate("Current State"), "WC.iec61851_state");
+			$this->RegisterVariableInteger("Current_State", $this->translate("iec 61851 Current State"), "WC.iec61851_state");
             $this->RegisterVariableInteger("Charger_State", $this->translate("Charger State"), "WC.charger_state");
             $this->RegisterVariableInteger("Contactor_State", $this->translate("Contactor State"), "WC.contactor_state");
             $this->RegisterVariableInteger("Contactor_Error", $this->translate("Contactor Error Code"));
@@ -114,25 +109,23 @@ declare(strict_types=1);
 
 		}
 
-		public function Destroy()
-		{
+		public function Destroy() {
 			//Never delete this line!
 			parent::Destroy();
 		}
 
-		public function ApplyChanges()
-		{
+		public function ApplyChanges() {
 			//Never delete this line!
 			parent::ApplyChanges();
 			
 			$TimerMS = $this->ReadPropertyInteger("Timer") * 1000;
 			$this->SetTimerInterval("WARP Charger",$TimerMS);
-
 		}
 
 		public function Update() 
 		{
-			//
+			$this->SendDebug("Request Data", "Timed Data Receiver", 0);
+			$this->GetState();
 		}
 
 		public function GetData($APIEndPoint) {
@@ -140,8 +133,6 @@ declare(strict_types=1);
 			$ChargerAddress = $this->ReadPropertyString("ChargerAddress");
 			$UserName = $this->ReadPropertyString("UserName");
 			$Password = $this->ReadPropertyString("Password");
-
-			//$APIEndPoint = "/evse/state";
 			
 			$URL = 'http://'.$ChargerAddress.$APIEndPoint;
 
@@ -159,20 +150,20 @@ declare(strict_types=1);
 			$Error = curl_error($ch);
 
 			if ($http_code == "200") {
-				$this->SendDebug("Request Data","Login OK - Data: ".$Result, 0);
+				$this->SendDebug("Request Data","Login OK - HTTP code recveied: ".$http_code, 0);
 				$this->SetBuffer("JSON_Result_Charger",$Result);
 			}
 			else if ($http_code == "401") {
-				$this->SendDebug("Request Data","Login Failure - Check Username or Password", 0);
+				$this->SendDebug("Request Data","Login Failure - Check Username or Password - HTTP code recveied: ".$http_code, 0);
 			}
 			else if ($http_code == "0") {
-				$this->SendDebug("Request Data","General Failure - Check charger IP", 0);
+				$this->SendDebug("Request Data","General Failure - Check charger IP - HTTP code recveied: ".$http_code, 0);
 			}
 
 		}
 
-		public function GetState() 
-		{
+		public function GetState() {
+
 			$this->GetData($APIEndPoint = "/evse/state");
 			$JSON_Result_Charger = $this->GetBuffer("JSON_Result_Charger");
 			$this->SetBuffer("JSON_Result_Charger","");
@@ -188,8 +179,8 @@ declare(strict_types=1);
 			//SetValue($this->GetIDForIdent("Time_Since_State_Change"), Round($DataPointsState["time_since_state_change"]/1000,0));
 		}
 
-		public function GetMeterReading() 
-		{
+		public function GetMeterReading() {
+
 			$this->GetData($APIEndPoint = "/evse/energy_meter_values");
 			$JSON_Result_Charger = $this->GetBuffer("JSON_Result_Charger");
 			$this->SetBuffer("JSON_Result_Charger","");
@@ -201,9 +192,9 @@ declare(strict_types=1);
             SetValue($this->GetIDForIdent("Energy_Since_Production"), $DataPointMeter["energy_abs"]);
 		}
 
-		public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
-		{
-			$this->SendDebug($this->Translate("Sender"), $SenderID, 0);
+		public function MessageSink($TimeStamp, $SenderID, $Message, $Data)	{
+
+			//$this->SendDebug($this->Translate("Sender"), $SenderID, 0);
 			$this->SetBuffer("SenderID", $SenderID);
 
 			if ($SenderID == ($this->GetIDForIdent("Trigger_Start_Charging"))){
@@ -213,7 +204,7 @@ declare(strict_types=1);
                     $this->TriggerCharger($APIEndPoint = "/evse/start_charging");
                 }
 				else if (GetValue($SenderID) == false) {
-					$this->SendDebug($this->Translate("Command Received"), $this->Translate("Start Charging is false"), 0);
+					//$this->SendDebug($this->Translate("Command Received"), $this->Translate("Start Charging is false"), 0);
 					exit;
 				}
 			} else if ($SenderID == ($this->GetIDForIdent("Trigger_Stop_Charging"))){
@@ -222,7 +213,7 @@ declare(strict_types=1);
 				$this->SendDebug($this->Translate("Command Received"), $this->Translate("Stop Charging"), 0);
 				$this->TriggerCharger($APIEndPoint = "/evse/stop_charging");
 			} elseif (GetValue($SenderID) == false) {
-                    $this->SendDebug($this->Translate("Command Received"), $this->Translate("Stop Charging is false"), 0);
+                    //$this->SendDebug($this->Translate("Command Received"), $this->Translate("Stop Charging is false"), 0);
                     exit;
                 }
 
@@ -230,9 +221,9 @@ declare(strict_types=1);
 
 		}
 
-		public function TriggerCharger($APIEndPoint) 
-		{
-			$this->SendDebug("Command Received", "Contacting Charger ".$APIEndPoint, 0);
+		public function TriggerCharger($APIEndPoint) {
+
+			$this->SendDebug("Send Command", "Contacting Charger ".$APIEndPoint, 0);
 
 			$ChargerAddress = $this->ReadPropertyString("ChargerAddress");
             $UserName = $this->ReadPropertyString("UserName");
@@ -257,30 +248,49 @@ declare(strict_types=1);
             curl_setopt($ch, CURLOPT_USERNAME, $UserName);
             curl_setopt($ch, CURLOPT_PASSWORD, $Password);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, "{}");
-			//curl_setopt($ch, CURLOPT_POSTFIELDS, "\"\"");
             curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC | CURLAUTH_DIGEST);
             $Result = curl_exec($ch);
-			$this->SendDebug("Command Received", $Result, 0);
 
             $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE );
-			$this->SendDebug($this->Translate("Request Data"), $this->Translate("HTTP CODE: ").$http_code, 0);
+			$this->SendDebug($this->Translate("Send Command"), $this->Translate("HTTP CODE: ").$http_code, 0);
             $Error = curl_error($ch);
 
+			if ($APIEndPoint == "/evse/start_charging") {
+				$Command = "start";
+			}
+			else {
+				$Command = "stop";
+			}
+
             if ($http_code == "200") {
-                $this->SendDebug("Request Data", "Login OK - Data: ".$Result, 0);
-                $this->SetBuffer("JSON_Result_Charger", $Result);
+                $this->SendDebug("Send Command", "Login OK - Command sent: ".$Command." charging - HTTP code recveied: ".$http_code, 0);
             } elseif ($http_code == "401") {
-                $this->SendDebug("Request Data", "Login Failure - Check Username or Password", 0);
+                $this->SendDebug("Send Command", "Login Failure - Check Username or Password - HTTP code recveied: ".$http_code, 0);
             } elseif ($http_code == "0") {
-                $this->SendDebug("Request Data", "General Failure - Check charger IP", 0);
+                $this->SendDebug("Send Command", "General Failure - Check charger IP - HTTP code recveied: ".$http_code, 0);
             }
 
 		}
 
-		public function RequestAction($Ident, $Value) 
-		{
+		public function RequestAction($Ident, $Value) {
 			$this->SetValue($Ident, $Value);
 		}
 
+		public function TurnArchivingOn() {
+            $archiveID = IPS_GetInstanceListByModuleID('{43192F0B-135B-4CE7-A0A7-1475603F3060}')[0];
+			$Current_Charge_Power_Id = $this->GetIDForIdent("Current_Charge_Power");
+            $Energy_Since_Reset_Id = $this->GetIDForIdent("Energy_Since_Reset");
+            $Energy_Since_Production_Id = $this->GetIDForIdent("Energy_Since_Production");
+    
+            //if ($manufacturerId == "ESY") {
+        
+			AC_SetLoggingStatus($archiveID, $Current_Charge_Power_Id, true);
+            AC_SetAggregationType($archiveID, $Current_Charge_Power_Id, 0);
+            AC_SetLoggingStatus($archiveID, $Energy_Since_Reset_Id, true);
+            AC_SetAggregationType($archiveID, $Energy_Since_Reset_Id, 1);
+            AC_SetLoggingStatus($archiveID, $Energy_Since_Production_Id, true);
+            AC_SetAggregationType($archiveID, $Energy_Since_Production_Id, 1);
+            IPS_ApplyChanges($archiveID);
+        }
 
 	}
