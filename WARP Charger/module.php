@@ -99,6 +99,7 @@ declare(strict_types=1);
 
 			$this->RegisterVariableBoolean("Trigger_Start_Charging", $this->translate("_Start Charging"), "~Switch");
 			$this->RegisterVariableBoolean("Trigger_Stop_Charging", $this->translate("_Stop Charging"), "~Switch");
+			$this->RegisterVariableInteger("Max_Charging_Current", $this->translate("_Maximum Charge Current"));
 
 			$this->EnableAction("Trigger_Start_Charging");
 			$this->RegisterMessage(IPS_GetObjectIDByIdent("Trigger_Start_Charging", $this->InstanceID), VM_UPDATE);
@@ -106,6 +107,8 @@ declare(strict_types=1);
 			$this->EnableAction("Trigger_Stop_Charging");
 			$this->RegisterMessage(IPS_GetObjectIDByIdent("Trigger_Stop_Charging", $this->InstanceID), VM_UPDATE);
 
+			$this->EnableAction("Max_Charging_Current");
+            $this->RegisterMessage(IPS_GetObjectIDByIdent("Max_Charging_Current", $this->InstanceID), VM_UPDATE);
 
 		}
 
@@ -197,6 +200,40 @@ declare(strict_types=1);
 			//$this->SendDebug($this->Translate("Sender"), $SenderID, 0);
 			$this->SetBuffer("SenderID", $SenderID);
 
+			switch ($SenderID) {
+				case $this->GetIDForIdent("Trigger_Start_Charging"):
+					if (GetValue($SenderID) == true) {
+						SetValue($SenderID, false);
+						$this->SendDebug($this->Translate("Command Received"), $this->Translate("Start Charging"), 0);
+						$this->TriggerCharger($APIEndPoint = "/evse/start_charging",$Payload = "");
+					} elseif (GetValue($SenderID) == false) {
+                    	//$this->SendDebug($this->Translate("Command Received"), $this->Translate("Start Charging is false"), 0);
+                    	exit;
+                	}
+				break;
+
+				case $this->GetIDForIdent("Trigger_Stop_Charging"):
+					if (GetValue($SenderID) == true) {
+						SetValue($SenderID, false);
+						$this->SendDebug($this->Translate("Command Received"), $this->Translate("Stop Charging"), 0);
+						$this->TriggerCharger($APIEndPoint = "/evse/stop_charging",$Payload = "");
+					} elseif (GetValue($SenderID) == false) {
+						//$this->SendDebug($this->Translate("Command Received"), $this->Translate("Stop Charging is false"), 0);
+						exit;
+					}
+				break;
+
+				case $this->GetIDForIdent("Max_Charging_Current"):
+					$Maximum_Charging_Current = GetValue($this->GetIDForIdent("Max_Charging_Current"));
+					$this->SendDebug($this->Translate("Command Received"), $this->Translate("Change Maximum Charging Current to: ").$Maximum_Charging_Current, 0);
+                    $this->TriggerCharger($APIEndPoint = "evse/global_current", $Payload = $Maximum_Charging_Current);
+				break;
+
+
+			}
+
+			/*
+
 			if ($SenderID == ($this->GetIDForIdent("Trigger_Start_Charging"))){
                 if (GetValue($SenderID) == true) {
                     SetValue($SenderID, false);
@@ -219,20 +256,28 @@ declare(strict_types=1);
 
 			}
 
+			*/
+
 		}
 
-		public function TriggerCharger($APIEndPoint) {
+		public function TriggerCharger($APIEndPoint, $Payload) {
 
-			$this->SendDebug("Send Command", "Contacting Charger ".$APIEndPoint, 0);
+			$this->SendDebug("Send Command", "Contacting Charger ".$APIEndPoint." Payload: ".$Payload, 0);
 
 			$ChargerAddress = $this->ReadPropertyString("ChargerAddress");
             $UserName = $this->ReadPropertyString("UserName");
             $Password = $this->ReadPropertyString("Password");
 
-                        
+			if ($Payload == "") {
+				$Payload = "\"\"";
+			} else {
+				$Payload = "{\"current\": ".$Payload."}";
+			}  
+
             $URL = 'http://'.$ChargerAddress.$APIEndPoint;
 			//$fields = array("id" => 1);
-			$data = "\"\"";
+			//$data = "\"\"";
+			$data = $Payload;
 			$data_JSON = json_encode($data);
 
             $ch = curl_init();
