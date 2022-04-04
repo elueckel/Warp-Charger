@@ -179,7 +179,6 @@ declare(strict_types=1);
 			SetValue($this->GetIDForIdent("Contactor_Error"), $DataPointsState["contactor_error"]);
 			SetValue($this->GetIDForIdent("Error_State"), $DataPointsState["error_state"]);
 			SetValue($this->GetIDForIdent("Lock_State"), $DataPointsState["lock_state"]);
-			//SetValue($this->GetIDForIdent("Time_Since_State_Change"), Round($DataPointsState["time_since_state_change"]/1000,0));
 		}
 
 		public function GetMeterReading() {
@@ -226,37 +225,11 @@ declare(strict_types=1);
 				case $this->GetIDForIdent("Max_Charging_Current"):
 					$Maximum_Charging_Current = GetValue($this->GetIDForIdent("Max_Charging_Current"));
 					$this->SendDebug($this->Translate("Command Received"), $this->Translate("Change Maximum Charging Current to: ").$Maximum_Charging_Current, 0);
-                    $this->TriggerCharger($APIEndPoint = "evse/global_current", $Payload = $Maximum_Charging_Current);
+                    $this->TriggerCharger($APIEndPoint = "/evse/global_current_update", $Payload = $Maximum_Charging_Current);
 				break;
 
 
 			}
-
-			/*
-
-			if ($SenderID == ($this->GetIDForIdent("Trigger_Start_Charging"))){
-                if (GetValue($SenderID) == true) {
-                    SetValue($SenderID, false);
-                    $this->SendDebug($this->Translate("Command Received"), $this->Translate("Start Charging"), 0);
-                    $this->TriggerCharger($APIEndPoint = "/evse/start_charging");
-                }
-				else if (GetValue($SenderID) == false) {
-					//$this->SendDebug($this->Translate("Command Received"), $this->Translate("Start Charging is false"), 0);
-					exit;
-				}
-			} else if ($SenderID == ($this->GetIDForIdent("Trigger_Stop_Charging"))){
-				if (GetValue($SenderID) == true) {
-				SetValue($SenderID, false);
-				$this->SendDebug($this->Translate("Command Received"), $this->Translate("Stop Charging"), 0);
-				$this->TriggerCharger($APIEndPoint = "/evse/stop_charging");
-			} elseif (GetValue($SenderID) == false) {
-                    //$this->SendDebug($this->Translate("Command Received"), $this->Translate("Stop Charging is false"), 0);
-                    exit;
-                }
-
-			}
-
-			*/
 
 		}
 
@@ -269,19 +242,15 @@ declare(strict_types=1);
             $Password = $this->ReadPropertyString("Password");
 
 			if ($Payload == "") {
-				$Payload = "\"\"";
+				$Payload = "{}";
+				$data_JSON = $Payload;
 			} else {
-				$Payload = "{\"current\": ".$Payload."}";
+				$data_JSON = json_encode($Payload);
 			}  
 
             $URL = 'http://'.$ChargerAddress.$APIEndPoint;
-			//$fields = array("id" => 1);
-			//$data = "\"\"";
-			$data = $Payload;
-			$data_JSON = json_encode($data);
-
+			
             $ch = curl_init();
-			//curl_setopt($ch, CURLOPT_PUT, true);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
 			curl_setopt($ch, CURLOPT_URL, $URL);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -292,7 +261,7 @@ declare(strict_types=1);
             curl_setopt($ch, CURLOPT_TIMEOUT_MS, 5000);
             curl_setopt($ch, CURLOPT_USERNAME, $UserName);
             curl_setopt($ch, CURLOPT_PASSWORD, $Password);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, "{}");
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $data_JSON);
             curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC | CURLAUTH_DIGEST);
             $Result = curl_exec($ch);
 
