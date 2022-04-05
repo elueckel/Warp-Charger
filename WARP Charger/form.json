@@ -14,7 +14,7 @@
                 },
                 {
                     "type": "Label",
-                    "label": "The module will create a set of variables in the object tree. The ones with _ allow starting and stop charging simulating a push button."
+                    "label": "The module will create a set of variables in the object tree. The ones with _ allow starting and stop charging simulating a push button - further the max. charge current can be set."
                 }
             ]
         },
