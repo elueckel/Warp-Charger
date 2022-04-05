@@ -73,7 +73,7 @@ Im Objektbaum können die folgenden Variablen gesteuert werden:
 
 ## 5. Versionsinformation
 
-Version 1 05-04-2022
+Version 1.0 05-04-2022
 * Unterstützung für WARP2 Charger Smart und Professional mit Firmware 2
 * Auslesen Fehlerstände
 * Auslesen Verbrauchsdaten und Ladeverlauf
