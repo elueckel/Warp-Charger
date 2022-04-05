@@ -30,7 +30,7 @@ Das Modul unterstützt die Tinkerforge WARP2 Charger Smart und Professional.
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' kann das 'UniFi Presence Manager'-Modul mithilfe des Schnellfilters gefunden werden.  
+ Unter 'Instanz hinzufügen' kann das 'WARP2 Charger'-Modul mithilfe des Schnellfilters gefunden werden.  
 	- Weitere Informationen zum Hinzufügen von Instanzen in der [Dokumentation der Instanzen](https://www.symcon.de/service/dokumentation/konzepte/instanzen/#Instanz_hinzufügen)
 
 __Konfigurationsseite__:
@@ -67,8 +67,8 @@ Das Modul gibt diverse Informationen im Debug Bereich aus.
 
 Im Objektbaum können die folgenden Variablen gesteuert werden:
 * _Maximaler Ladestrom (nutzbar für Überschussladen)
-* _Start Ladevorgang (Taster ... setzt sie automatisch zuürck)
-* _Stop Ladevorgang (Taster ... setzt sie automatisch zuürck)
+* _Start Ladevorgang (Taster ... setzt sich automatisch zurück)
+* _Stop Ladevorgang (Taster ... setzt sich automatisch zurück)
 
 
 ## 5. Versionsinformation

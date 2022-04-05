@@ -295,9 +295,7 @@ declare(strict_types=1);
 			$Current_Charge_Power_Id = $this->GetIDForIdent("Current_Charge_Power");
             $Energy_Since_Reset_Id = $this->GetIDForIdent("Energy_Since_Reset");
             $Energy_Since_Production_Id = $this->GetIDForIdent("Energy_Since_Production");
-    
-            //if ($manufacturerId == "ESY") {
-        
+         
 			AC_SetLoggingStatus($archiveID, $Current_Charge_Power_Id, true);
             AC_SetAggregationType($archiveID, $Current_Charge_Power_Id, 0);
             AC_SetLoggingStatus($archiveID, $Energy_Since_Reset_Id, true);
