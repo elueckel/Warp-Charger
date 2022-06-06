@@ -78,3 +78,6 @@ Version 1.0 05-04-2022
 * Ability to start/stop charging
 * Ability to set the maximum charge current
 * Ability to turn archiving on
+
+Version 1.01 06-06-2022
+* Fix get Meter reading due to API Update
