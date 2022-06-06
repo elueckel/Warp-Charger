@@ -81,4 +81,4 @@ Version 1.0 05-04-2022
 * Setzen des Ladestroms
 
 Version 1.01 06-06-2022
-* Fix auslesen der Zähler wegen API Update
+* Fix Fehler beim Auslesen der Zähler wegen API Update
