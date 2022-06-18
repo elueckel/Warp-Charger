@@ -81,3 +81,6 @@ Version 1.0 05-04-2022
 
 Version 1.01 06-06-2022
 * Fix get Meter reading due to API Update
+
+Version 1.02 18-06-2022
+* Fix automatic retrieval of data

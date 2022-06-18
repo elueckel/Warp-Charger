@@ -125,10 +125,10 @@ declare(strict_types=1);
 			$this->SetTimerInterval("WARP Charger",$TimerMS);
 		}
 
-		public function Update() 
-		{
+		public function Update() {
 			$this->SendDebug("Request Data", "Timed Data Receiver", 0);
 			$this->GetState();
+			$this->GetMeterReading();
 		}
 
 		public function GetData($APIEndPoint) {
