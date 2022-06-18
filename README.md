@@ -79,3 +79,9 @@ Version 1.0 05-04-2022
 * Auslesen Verbrauchsdaten und Ladeverlauf
 * Start/Stop Ladevorgang
 * Setzen des Ladestroms
+
+Version 1.01 06-06-2022
+* Fix Fehler beim Auslesen der Zähler wegen API Update
+
+Version 1.02 18-06-2022
+* Fix Automatischer Abruf von Daten

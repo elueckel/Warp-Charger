@@ -125,10 +125,10 @@ declare(strict_types=1);
 			$this->SetTimerInterval("WARP Charger",$TimerMS);
 		}
 
-		public function Update() 
-		{
+		public function Update() {
 			$this->SendDebug("Request Data", "Timed Data Receiver", 0);
 			$this->GetState();
+			$this->GetMeterReading();
 		}
 
 		public function GetData($APIEndPoint) {
@@ -183,7 +183,7 @@ declare(strict_types=1);
 
 		public function GetMeterReading() {
 
-			$this->GetData($APIEndPoint = "/evse/energy_meter_values");
+			$this->GetData($APIEndPoint = "/meter/values");
 			$JSON_Result_Charger = $this->GetBuffer("JSON_Result_Charger");
 			$this->SetBuffer("JSON_Result_Charger","");
 			$this->SendDebug($this->Translate("Meter Reading"), $JSON_Result_Charger, 0);
